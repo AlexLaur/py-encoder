@@ -1,0 +1,13 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource>
+        <file>resources/img/dragndrop_base.png</file>
+        <file>resources/img/dragndrop_highlight.png</file>
+
+        <file>resources/svg/oval.svg</file>
+        <file>resources/svg/puff.svg</file>
+        <file>resources/svg/tail-spin.svg</file>
+
+        <file>resources/style/style.qss</file>
+    </qresource>
+</RCC>
