@@ -2,7 +2,6 @@ import os
 import mimetypes
 
 from PySide2 import QtCore, QtGui, QtWidgets
-import qtawesome as qta
 
 from ui import main
 from libs.pe_logger import logger
@@ -17,15 +16,29 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
         super(MainWindow, self).__init__(parent=parent)
         self.setupUi(self)
 
+        # CONSTANT
+        self.settings_path = os.path.join(
+            os.path.expanduser('~'), '.py_encoder', 'settings.ini')
+
+        # WIDGET
         self.console_widget = ConsoleWidget(parent=self)
 
+        # PLUGIN
         self.plugin_manager = PluginCollection('plugins')
 
         self.threadpool = ThreadPool()
         self.signal = EventHandler()
 
+        self.tab_conversion_files.define_header()
+
+        # SETTINGS
+        self.load_settings()
+
+        # SIGNALS
         self.lab_dradndrop.signal.sig_new_file.connect(self.process_new_file)
         self.action_console.triggered.connect(self.console_widget.show)
+        self.action_clear_all_rows.triggered.connect(
+            self.tab_conversion_files.clear_rows)
         self.signal.sig_convert_status.connect(self.result_convert_file)
         self.pub_convert.clicked.connect(self.convert_files)
 
@@ -51,16 +64,13 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
         converted item in the table
         :type result: dict
         """
+        item = self.tab_conversion_files.cellWidget(result['row'], 3)
         if result['result']:
-            icon = qta.icon('fa5s.check', color='white')
+            item.set_done()
             logger.info('Conversion Done.')
         else:
-            icon = qta.icon('fa5s.times', color='white')
+            item.set_error()
             logger.warning('Conversion Failed.')
-        label = QtWidgets.QLabel()
-        label.setPixmap(icon.pixmap(QtCore.QSize(32, 32)))
-        label.setAlignment(QtCore.Qt.AlignHCenter)
-        self.tab_conversion_files.setCellWidget(result['row'], 3, label)
 
     def convert_files(self):
         """This method convert all files in the table """
@@ -71,22 +81,22 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
             if os.path.exists(output_path):
                 message_box = QtWidgets.QMessageBox(parent=self)
                 message_box.setText('Output file already exists.')
-                message_box.setInformativeText('%s already exists, do you want overwrite it ?' % output_path)
+                message_box.setInformativeText(
+                    '%s already exists, do you want overwrite it ?' %
+                    output_path)
                 message_box.setStandardButtons(QtWidgets.QMessageBox.Ok |
                                             QtWidgets.QMessageBox.Cancel)
                 message_box.setDefaultButton(QtWidgets.QMessageBox.Ok)
                 ret = message_box.exec_()
 
                 if ret == QtWidgets.QMessageBox.Cancel:
-                    data = {'result': False, 'row': row}
-                    self.signal.sig_convert_status.emit(data)
-                    return
+                    continue
 
             combobox = self.tab_conversion_files.cellWidget(row, 2)
             codec = combobox.currentText()
 
-            svg = StatusTableWidgetItem(parent=self)
-            self.tab_conversion_files.setCellWidget(row, 3, svg)
+            item = self.tab_conversion_files.cellWidget(row, 3)
+            item.set_work_in_progress()
 
             self.threadpool.execution(
                 function=self._convert,
@@ -115,3 +125,51 @@ class MainWindow(QtWidgets.QMainWindow, main.Ui_MainWindow):
 
         data = {'result': result, 'row': row}
         self.signal.sig_convert_status.emit(data)
+
+    def load_settings(self):
+        """This method load the settings"""
+        settings = self.open_settings_file()
+
+        try:
+            self.restoreGeometry(settings.value('Geometry'))
+        except Exception as error:
+            logger.warning('An error has occured while loading settings : %s' %
+                           error)
+
+    def save_settings(self):
+        """This method save the settings in a file"""
+        settings = self.create_settings_file()
+
+        try:
+            settings.setValue('Geometry', self.saveGeometry())
+        except Exception as error:
+            logger.warning('An error has occured while saving settings : %s' %
+                           error)
+
+    def create_settings_file(self):
+        """This function creates the setting file if it doesn't exist"""
+        logger.info('Detecting settings files')
+        if not os.path.exists(os.path.dirname(self.settings_path)):
+            os.makedirs(os.path.dirname(self.settings_path))
+        settings = QtCore.QSettings(
+            self.settings_path, QtCore.QSettings.IniFormat)
+        logger.info('Setting file at %s' % self.settings_path)
+        return settings
+
+    def open_settings_file(self):
+        """This function open the settings file and return the settings object
+
+        :return: The settings object
+        :rtype: QSettings
+        """
+        logger.info('Oppening settings file.')
+        if not os.path.exists(self.settings_path):
+            logger.warning('Settings file doesn\'t exist: %s' %
+                           self.settings_path)
+            return None
+        settings = QtCore.QSettings(
+            self.settings_path, QtCore.QSettings.IniFormat)
+        return settings
+
+    def closeEvent(self, event):
+        self.save_settings()

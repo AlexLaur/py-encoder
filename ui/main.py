@@ -26,6 +26,8 @@ class Ui_MainWindow(object):
         MainWindow.resize(1000, 480)
         self.action_console = QAction(MainWindow)
         self.action_console.setObjectName(u"action_console")
+        self.action_clear_all_rows = QAction(MainWindow)
+        self.action_clear_all_rows.setObjectName(u"action_clear_all_rows")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout = QVBoxLayout(self.centralwidget)
@@ -50,11 +52,13 @@ class Ui_MainWindow(object):
         __qtablewidgetitem3 = QTableWidgetItem()
         self.tab_conversion_files.setHorizontalHeaderItem(3, __qtablewidgetitem3)
         self.tab_conversion_files.setObjectName(u"tab_conversion_files")
+        self.tab_conversion_files.setMouseTracking(True)
         self.tab_conversion_files.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.tab_conversion_files.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tab_conversion_files.setAlternatingRowColors(True)
+        self.tab_conversion_files.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.tab_conversion_files.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.tab_conversion_files.setSortingEnabled(True)
-        self.tab_conversion_files.horizontalHeader().setStretchLastSection(True)
         self.tab_conversion_files.verticalHeader().setVisible(False)
 
         self.horizontalLayout.addWidget(self.tab_conversion_files)
@@ -73,13 +77,17 @@ class Ui_MainWindow(object):
         self.menubar.setGeometry(QRect(0, 0, 1000, 22))
         self.menuOptions = QMenu(self.menubar)
         self.menuOptions.setObjectName(u"menuOptions")
+        self.menuAction = QMenu(self.menubar)
+        self.menuAction.setObjectName(u"menuAction")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
+        self.menubar.addAction(self.menuAction.menuAction())
         self.menubar.addAction(self.menuOptions.menuAction())
         self.menuOptions.addAction(self.action_console)
+        self.menuAction.addAction(self.action_clear_all_rows)
 
         self.retranslateUi(MainWindow)
 
@@ -89,6 +97,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"PyEncoder", None))
         self.action_console.setText(QCoreApplication.translate("MainWindow", u"Console", None))
+        self.action_clear_all_rows.setText(QCoreApplication.translate("MainWindow", u"Clear all rows", None))
         self.lab_dradndrop.setText("")
         ___qtablewidgetitem = self.tab_conversion_files.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"Filename", None));
@@ -100,5 +109,6 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem3.setText(QCoreApplication.translate("MainWindow", u"Status", None));
         self.pub_convert.setText(QCoreApplication.translate("MainWindow", u"Convert", None))
         self.menuOptions.setTitle(QCoreApplication.translate("MainWindow", u"Options", None))
+        self.menuAction.setTitle(QCoreApplication.translate("MainWindow", u"Action", None))
     # retranslateUi
 

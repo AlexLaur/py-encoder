@@ -146,8 +146,3 @@ QTableView {
   background-color: palette(link-visited);
   alternate-background-color: palette(midlight);
 }
-
-QTreeWidget::item {
-  padding: 10px;
-  qproperty-iconSize: 32px;
-}

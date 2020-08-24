@@ -29,6 +29,7 @@ class H264Encoder(Plugin):
 
         status = False
         try:
+            self.create_output_path(path=output_path)
             stream = ffmpeg.input(input_path)
             stream = ffmpeg.output(stream, output_path)
             ffmpeg.run(stream, overwrite_output=overwrite_output)
@@ -38,3 +39,7 @@ class H264Encoder(Plugin):
             status = False
 
         return status
+
+    def create_output_path(self, path):
+        if not os.path.exists(os.path.dirname(path)):
+            os.makedirs(os.path.dirname(path))
