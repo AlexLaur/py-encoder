@@ -50,3 +50,12 @@ class H265Encoder(Plugin):
     def create_output_path(self, path):
         if not os.path.exists(os.path.dirname(path)):
             os.makedirs(os.path.dirname(path))
+
+
+class H265EncoderMov(H265Encoder):
+    def __init__(self):
+        super(H265EncoderMov, self).__init__()
+
+        self.extension = 'mov'
+        self.name = 'H.265/HEVC (mov)'
+        self.description = 'Convert any file in H.265 with .mov container'
